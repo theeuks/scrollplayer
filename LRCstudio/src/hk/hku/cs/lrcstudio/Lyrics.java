@@ -162,20 +162,15 @@ public class Lyrics {
 			return null;
 		}
 		
-		String subRip = "";
-		for (int i = 1; i <= subtitles.size(); ++i) {
-			String subtitleNumber = String.format(Locale.US, "%d", i);
-			String startTime = millisecondsToSubRipTimeFormat(startPositions.get(i));
-			String endTime = millisecondsToSubRipTimeFormat(endPositions.get(i));
-			String subtitle = subtitles.get(i);
-			
-			subRip += String.format(Locale.US, "%s%n%s --> %s%n%s%n%n",
-			                        subtitleNumber,
-			                        startTime,
-			                        endTime,
-			                        subtitle);
+		StringBuilder subRip = new StringBuilder();
+		for (int i = 0; i < subtitles.size(); ++i) {
+			subRip.append(String.format(Locale.US, "%s%n%s --> %s%n%s%n%n",
+			                            String.format(Locale.US, "%d", i + 1),
+			                            millisecondsToSubRipTimeFormat(startPositions.get(i)),
+			                            millisecondsToSubRipTimeFormat(endPositions.get(i)),
+			                            subtitles.get(i)));
 		}
 		
-		return subRip;
+		return subRip.toString();
 	}
 }
