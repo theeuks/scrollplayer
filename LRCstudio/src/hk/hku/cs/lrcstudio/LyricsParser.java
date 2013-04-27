@@ -100,9 +100,12 @@ public class LyricsParser extends Activity {
     	data=data.substring(data.indexOf("</div>")+6);
     	data=data.substring(0,data.indexOf("<div class=\'rt")-1);
     	data=data.replaceAll("&#","");
+    	data=data.replaceAll("<b>","");
+    	data=data.replaceAll("</b>","");
+    	data=data.replaceAll("<br /><br />","<br />");
     	while(data.indexOf("<br />")>0){
-    		String currentline=data.substring(0,data.indexOf("<br />")-1);
-    		Log.v("currentline",currentline);
+    		String currentline=data.substring(0,data.indexOf("<br />"));
+    		
     		String lyric="";
     		String [] Temp_array=currentline.split(";");
     		for (int i = 0; i < Temp_array.length; i++) { 
@@ -110,6 +113,7 @@ public class LyricsParser extends Activity {
     		}
     		lyrics.add(lyric);
     		data=data.substring(data.indexOf("<br />")+6,data.length());
+    		Log.v("currentline",data);
     	}
     	for (int i = 0; i < lyrics.size(); i++) {
     	    if(!lyrics.get(i).equals(null)){
