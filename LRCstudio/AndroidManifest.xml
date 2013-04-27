@@ -25,11 +25,25 @@
             android:label="Search Results" >
          
             <intent-filter>
-                 <action android:name="com.example.lyrics.search.search" />
+                 
                 <category android:name="android.intent.category.DEFAULT" />
                 
             </intent-filter>
         </activity>
+        
+        <activity
+            android:name=".LyricsParser"
+            android:label="Lyrics" >
+         
+            <intent-filter>
+                
+                <category android:name="android.intent.category.DEFAULT" />
+                
+            </intent-filter>
+        </activity>
+         
+         
+         
         <activity
             android:name=".PlayListActivity" />
     </application>

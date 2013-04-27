@@ -41,17 +41,19 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
-import android.widget.TextView;
 
 
 
 
 
-public class search extends Activity {
+
+public class LyricsParser extends Activity {
 	
-	 
+	private ArrayList<String> lyrics;
   
 	 List<HashMap<String, String>> fillMaps = new ArrayList<HashMap<String, String>>();
     @TargetApi(9)
@@ -60,34 +62,22 @@ public class search extends Activity {
     	 StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
     	    StrictMode.setThreadPolicy(policy);
     	super.onCreate(savedInstanceState);
-        setContentView(R.layout.results);
-        ListView lv= (ListView)findViewById(R.id.listview);
+        setContentView(R.layout.lyricsview);
+        ListView lv= (ListView)findViewById(R.id.lyricsview);
         
-        String[] from = new String[] {"artist", "URL"};
-        int[] to = new int[] { R.id.item1, R.id.item2, };
+        String[] from = new String[] {"lyric"};
+        int[] to = new int[] { R.id.item1 };
         
-        
+        lyrics = new ArrayList();
     	Intent intent = getIntent();
-    	String query=intent.getStringExtra("query");
-    	
-    	query=query.replaceAll("\\s","+");
-    	String base="http://lyrics.wikia.com/index.php?search=";
-    	String end="&fulltext=Search";
-    	String url=base+query+end;
-    	SendHttpRequest(url);
-    	SimpleAdapter adapter = new SimpleAdapter(this, fillMaps, R.layout.griditem, from, to);
-    	lv.setAdapter(adapter);
-  	  lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-      	  public void onItemClick(AdapterView<?> arg0, View arg1, int position, long arg3) {
-      		  	Intent intent = new Intent(getApplicationContext(), LyricsParser.class);
-      		  	
-      		  	intent.putExtra("Song Name", fillMaps.get(position).get("artist").toString());
-      		  	intent.putExtra("URL", fillMaps.get(position).get("URL").toString());
-      		  	//intent.setData(Uri.parse(fillMaps.get(position).get("URL").toString()));
-      	    	startActivity(intent);
-      	  }
-      	});  
+    	String url=intent.getStringExtra("URL");
     
+ 
+    	
+    	SendHttpRequest(url);
+
+       	ArrayAdapter adapter = new ArrayAdapter<String>(getBaseContext(),android.R.layout.simple_list_item_1,lyrics);
+    	lv.setAdapter(adapter);
     
     }
     
@@ -101,28 +91,32 @@ public class search extends Activity {
     }
     
     private void ResultFilter(String data){
-
+   
     							
     	String artist="";
     	String url="";
-    	String findStr="<li class=\"result\">";
-    	int secondIndex,lastIndex = 0;
-    	while(data.indexOf(findStr)>0){
-    		HashMap<String, String> map = new HashMap<String, String>();
-    		lastIndex=data.indexOf(findStr);
-    		lastIndex+=findStr.length();
 
-    		data=data.substring(lastIndex);
-    		url=data.substring(data.indexOf("http"),data.indexOf("class=")-2);
- 		
-    		secondIndex=data.indexOf("\" >");
-    		artist=data.substring(secondIndex+3,data.indexOf("</a>"));
-
-    		map.put("artist",artist);
-    		map.put("URL",url);
-    		fillMaps.add(map);
-   		
+    	data=data.substring(data.indexOf("<div class='lyricbox'>"));
+    	data=data.substring(data.indexOf("</div>")+6);
+    	data=data.substring(0,data.indexOf("<div class=\'rt")-1);
+    	data=data.replaceAll("&#","");
+    	while(data.indexOf("<br />")>0){
+    		String currentline=data.substring(0,data.indexOf("<br />")-1);
+    		Log.v("currentline",currentline);
+    		String lyric="";
+    		String [] Temp_array=currentline.split(";");
+    		for (int i = 0; i < Temp_array.length; i++) { 
+    			lyric+=(char) Integer.parseInt(Temp_array[i]);
+    		}
+    		lyrics.add(lyric);
+    		data=data.substring(data.indexOf("<br />")+6,data.length());
     	}
+    	for (int i = 0; i < lyrics.size(); i++) {
+    	    if(!lyrics.get(i).equals(null)){
+    	        Log.v("data",lyrics.get(i));
+    	    }
+    	}
+    	
     	
     	
     }
