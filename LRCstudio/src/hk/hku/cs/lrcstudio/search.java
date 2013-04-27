@@ -75,7 +75,6 @@ public class search extends Activity {
     	String end="&fulltext=Search";
     	String url=base+query+end;
     	SendHttpRequest(url);
-    	Log.v("url",url);
     	SimpleAdapter adapter = new SimpleAdapter(this, fillMaps, R.layout.griditem, from, to);
     	lv.setAdapter(adapter);
   	  lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -112,13 +111,12 @@ public class search extends Activity {
 
     		data=data.substring(lastIndex);
     		url=data.substring(data.indexOf("http"),data.indexOf("class=")-2);
-    		Log.v("url",url);    		
-    		secondIndex=data.indexOf("\">");
-    		artist=data.substring(secondIndex+2,data.indexOf("</a>"));
+ 		
+    		secondIndex=data.indexOf("\" >");
+    		artist=data.substring(secondIndex+3,data.indexOf("</a>"));
+
     		map.put("artist",artist);
-    		Log.v("artist",artist);
     		map.put("URL",url);
-    		Log.v("result url",url);
     		fillMaps.add(map);
    		
     	}
