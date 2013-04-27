@@ -93,11 +93,14 @@ public class Lyrics {
 	 */
 	@TargetApi(Build.VERSION_CODES.GINGERBREAD)
 	private String millisecondsToSubRipTimeFormat(long milliseconds) {
-		return String.format(Locale.US, "%02d:%02d:%02d,%03d", 
-		                     TimeUnit.MILLISECONDS.toHours(milliseconds),
-		                     TimeUnit.MILLISECONDS.toMinutes(milliseconds),
-		                     TimeUnit.MILLISECONDS.toSeconds(milliseconds),
-		                     TimeUnit.MILLISECONDS.toMillis(milliseconds));
+		long hours = TimeUnit.MILLISECONDS.toHours(milliseconds);
+		milliseconds -= TimeUnit.MILLISECONDS.convert(hours, TimeUnit.HOURS);
+		long minutes = TimeUnit.MILLISECONDS.toMinutes(milliseconds);
+		milliseconds -= TimeUnit.MILLISECONDS.convert(minutes, TimeUnit.MINUTES);
+		long seconds = TimeUnit.MILLISECONDS.toSeconds(milliseconds);
+		milliseconds -= TimeUnit.MILLISECONDS.convert(seconds, TimeUnit.SECONDS);
+		
+		return String.format(Locale.US, "%02d:%02d:%02d,%03d", hours, minutes, seconds, milliseconds);
 	}
 	
 	/**
