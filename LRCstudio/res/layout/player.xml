@@ -182,4 +182,13 @@
         android:layout_centerVertical="true"
         android:text="Lyrics" />
     </LinearLayout>
+
+    <TextView
+        android:id="@+id/lyricsLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/player_footer_bg"
+        android:layout_centerHorizontal="true"
+        android:text="TextView" />
+
 </RelativeLayout>

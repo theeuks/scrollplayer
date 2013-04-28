@@ -1,5 +1,7 @@
 package hk.hku.cs.lrcstudio;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -34,6 +36,7 @@ public class AndroidBuildingMusicPlayerActivity extends Activity implements OnCo
 	private TextView songTitleLabel;
 	private TextView songCurrentDurationLabel;
 	private TextView songTotalDurationLabel;
+	private TextView lyricsLabel;
 	// Media Player
 	private  MediaPlayer mp;
 	// Handler to update UI timer, progress bar etc,.
@@ -48,6 +51,8 @@ public class AndroidBuildingMusicPlayerActivity extends Activity implements OnCo
 	private boolean isRepeat = false;
 	private ArrayList<HashMap<String, String>> songsList = new ArrayList<HashMap<String, String>>();
 	
+	// Lyrics for the current song.
+	private Lyrics lyrics;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -67,12 +72,14 @@ public class AndroidBuildingMusicPlayerActivity extends Activity implements OnCo
 		songTitleLabel = (TextView) findViewById(R.id.songTitle);
 		songCurrentDurationLabel = (TextView) findViewById(R.id.songCurrentDurationLabel);
 		songTotalDurationLabel = (TextView) findViewById(R.id.songTotalDurationLabel);
+		lyricsLabel = (TextView) findViewById(R.id.lyricsLabel);
 		btnLyrics = (Button) findViewById(R.id.btnLyrics);
 		
 		// Mediaplayer
 		mp = new MediaPlayer();
 		songManager = new SongsManager();
 		utils = new Utilities();
+		lyrics = new Lyrics();
 		
 		// Listeners
 		songProgressBar.setOnSeekBarChangeListener(this); // Important
@@ -300,8 +307,10 @@ public class AndroidBuildingMusicPlayerActivity extends Activity implements OnCo
 	public void  playSong(int songIndex){
 		// Play song
 		try {
-        	mp.reset();
-			mp.setDataSource(songsList.get(songIndex).get("songPath"));
+			mp.reset();
+			
+			String songPath = songsList.get(songIndex).get("songPath");
+			mp.setDataSource(songPath);
 			mp.prepare();
 			mp.start();
 			// Displaying Song title
@@ -316,7 +325,18 @@ public class AndroidBuildingMusicPlayerActivity extends Activity implements OnCo
 			songProgressBar.setMax(100);
 			
 			// Updating progress bar
-			updateProgressBar();			
+			updateProgressBar();
+			
+			// Load lyrics for the current song.
+			String lyricsPath = songPath.replaceFirst("\\.[mM][pP]3$", ".srt");
+			File lyricsFile = new File(lyricsPath);
+			if (lyricsFile.exists()) {
+				lyrics.load(new FileInputStream(lyricsFile), Lyrics.Format.SUBRIP);
+			} else {
+				// Clear existing lyrics which may be loaded from other songs.
+				lyrics.clear();
+			}
+			
 		} catch (IllegalArgumentException e) {
 			e.printStackTrace();
 		} catch (IllegalStateException e) {
@@ -339,7 +359,7 @@ public class AndroidBuildingMusicPlayerActivity extends Activity implements OnCo
 	private Runnable mUpdateTimeTask = new Runnable() {
 		   public void run() {
 			   long totalDuration = mp.getDuration();
-			   long currentDuration = mp.getCurrentPosition();
+			   int currentDuration = mp.getCurrentPosition();
 			  
 			   // Displaying Total Duration time
 			   songTotalDurationLabel.setText(""+utils.milliSecondsToTimer(totalDuration));
@@ -350,6 +370,14 @@ public class AndroidBuildingMusicPlayerActivity extends Activity implements OnCo
 			   int progress = (int)(utils.getProgressPercentage(currentDuration, totalDuration));
 			   //Log.d("Progress", ""+progress);
 			   songProgressBar.setProgress(progress);
+			   
+			   // Update lyrics text.
+			   String lyricsText = lyrics.getSubtitle(currentDuration);
+			   if (lyricsText != null) {
+				   lyricsLabel.setText(lyricsText);
+			   } else {
+				   lyricsLabel.setText("");
+			   }
 			   
 			   // Running this thread after 100 milliseconds
 		       mHandler.postDelayed(this, 100);
