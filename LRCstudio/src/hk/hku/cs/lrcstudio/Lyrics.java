@@ -42,13 +42,7 @@ public class Lyrics {
 	 * @throws IOException
 	 */
 	public Lyrics(InputStream stream, Lyrics.Format format) throws IOException {
-		switch (format) {
-		case SUBRIP:
-			loadSubRip(stream);
-			break;
-		default:
-			throw new IOException("File format not supported.");
-		}
+		load(stream, format);
 	}
 	
 	/**
@@ -61,6 +55,48 @@ public class Lyrics {
 		startPositions.add(startPosition);
 		endPositions.add(endPosition);
 		subtitles.add(subtitle);
+	}
+	
+	/**
+	 * Clear playback positions and subtitles.
+	 */
+	public void clear() {
+		startPositions.clear();
+		endPositions.clear();
+		subtitles.clear();
+	}
+	
+	/**
+	 * Get subtitle for a playback position.
+	 * @param position MediaPlayer playback position.
+	 * @return Either a subtitle or <code>null</code> if no subtitles are available at that position.
+	 */
+	public String getSubtitle(Integer position) {
+		for (int i = 0; i < subtitles.size(); ++i) {
+			if ((position >= startPositions.get(i)) &&
+			    (position <= endPositions.get(i))) {
+				return subtitles.get(i);
+			}
+		}
+		
+		return null;
+	}
+	
+	/**
+	 * Overwrites current data with data from an external lyrics file.
+	 * @param stream InputStream of the file.
+	 * @param format A file format under <code>Lyrics.Format</code>.
+	 * @throws IOException
+	 */
+	public void load(InputStream stream, Lyrics.Format format) throws IOException {
+		clear();
+		switch (format) {
+		case SUBRIP:
+			loadSubRip(stream);
+			break;
+		default:
+			throw new IOException("File format not supported.");
+		}
 	}
 	
 	/**
@@ -80,7 +116,7 @@ public class Lyrics {
 		
 		reader.close();
 		
-		if ((startPositions.size() != endPositions.size()) &&
+		if ((startPositions.size() != endPositions.size()) ||
 		    (endPositions.size() != subtitles.size())) {
 			throw new IOException("Invalid SubRip file.");
 		}
@@ -114,7 +150,7 @@ public class Lyrics {
 			throw new IOException("Start time or end time is missing.");
 		}
 		
-		for (int i = 0; i < 1; ++i) {
+		for (int i = 0; i < 2; ++i) {
 			String[] timeComponents = times[i].split("[:,]");
 			if (timeComponents.length != 4) {
 				throw new IOException(String.format(Locale.US, "%s time does not have 4 fields.", i == 0 ? "Start" : "End"));
