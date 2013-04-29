@@ -23,6 +23,7 @@ public class Lyrics {
 	private List<String> subtitles;
 	
 	public enum Format {
+		LRC,
 		SUBRIP
 	}
 	
@@ -91,12 +92,31 @@ public class Lyrics {
 	public void load(InputStream stream, Lyrics.Format format) throws IOException {
 		clear();
 		switch (format) {
+		case LRC:
+			loadLRC(stream);
+			break;
 		case SUBRIP:
 			loadSubRip(stream);
 			break;
 		default:
 			throw new IOException("File format not supported.");
 		}
+	}
+	
+	/**
+	 * Loads an LRC file from an InputStream. Caller is responsible for closing the InputStream afterwards.
+	 * @param stream InputStream to read from.
+	 * @throws IOException
+	 */
+	private void loadLRC(InputStream stream) throws IOException {
+		BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
+		
+		String line = null;
+		while ((line = reader.readLine()) != null) {
+			parseLRC(line.substring(0, 10), line.substring(10));
+		}
+		
+		reader.close();
 	}
 	
 	/**
@@ -123,6 +143,37 @@ public class Lyrics {
 	}
 	
 	/**
+	 * Converts LRC time to milliseconds.
+	 * @param timeComponents An array of String in the format of: minutes, seconds, centiseconds
+	 * @return Milliseconds.
+	 */
+	@TargetApi(Build.VERSION_CODES.GINGERBREAD)
+	private int lrcTimeToMilliseconds(String[] timeComponents) {
+		int milliseconds = 0;
+		milliseconds += TimeUnit.MILLISECONDS.convert(Long.parseLong(timeComponents[0]), TimeUnit.MINUTES);
+		milliseconds += TimeUnit.MILLISECONDS.convert(Long.parseLong(timeComponents[1]), TimeUnit.SECONDS);
+		milliseconds += Integer.parseInt(timeComponents[2]) * 10;
+		
+		return milliseconds;
+	}
+	
+	/**
+	 * Helper to convert a MediaPlayer playback position into LRC's time format.
+	 * @param milliseconds MediaPlayer playback position.
+	 * @return LRC time.
+	 */
+	@TargetApi(Build.VERSION_CODES.GINGERBREAD)
+	private String millisecondsToLRCTimeFormat(long milliseconds) {
+		long minutes = TimeUnit.MILLISECONDS.toMinutes(milliseconds);
+		milliseconds -= TimeUnit.MILLISECONDS.convert(minutes, TimeUnit.MINUTES);
+		long seconds = TimeUnit.MILLISECONDS.toSeconds(milliseconds);
+		milliseconds -= TimeUnit.MILLISECONDS.convert(seconds, TimeUnit.SECONDS);
+		long centiseconds = milliseconds / 10;
+		
+		return String.format(Locale.US, "[%s:%s.%s]", minutes, seconds, centiseconds);
+	}
+	
+	/**
 	 * Helper to convert a MediaPlayer playback position into SubRip's time format.
 	 * @param milliseconds MediaPlayer playback position.
 	 * @return SubRip time.
@@ -140,7 +191,32 @@ public class Lyrics {
 	}
 	
 	/**
-	 * Parses SubRip's start time and end time.
+	 * Parses and adds an LRC line.
+	 * @param time Time in the format of [mm:ss.xx] where mm is minutes, ss is seconds and xx is centiseconds.
+	 * @param subtitle The subtitle text.
+	 * @throws IOException
+	 */
+	private void parseLRC(String time, String subtitle) throws IOException {
+		String[] timeComponents = time.replaceAll("[\\[\\]]", "").split("[:\\.]");
+		if (timeComponents.length != 3) {
+			throw new IOException(String.format(Locale.US, "Time does not have 3 fields."));
+		}
+		
+		int milliseconds = lrcTimeToMilliseconds(timeComponents);
+		if (startPositions.size() == endPositions.size()) {	// No subtitles currently showing.
+			startPositions.add(milliseconds);
+			subtitles.add(subtitle);
+		} else if (startPositions.size() > endPositions.size()) {	// Existing subtitle currently showing.
+			endPositions.add(milliseconds);	// Clear current subtitle.
+			
+			// Start new subtitle.
+			startPositions.add(milliseconds);
+			subtitles.add(subtitle);
+		}
+	}
+	
+	/**
+	 * Parses and adds SubRip start time and end time.
 	 * @param time The line which includes the start time and end time.
 	 * @throws IOException
 	 */
@@ -166,17 +242,75 @@ public class Lyrics {
 	}
 	
 	/**
+	 * Saves lyrics to a text file. Does nothing if there are no subtitles.
+	 * @param stream Stream to write to. 
+	 * @param format A format under <code>Lyrics.Format</code>.
+	 * @throws IOException
+	 */
+	public void save(OutputStream stream, Lyrics.Format format) throws IOException {
+		if (subtitles.size() == 0) {
+			return;
+		}
+		
+		switch (format) {
+		case LRC:
+			saveLRC(stream);
+			break;
+		case SUBRIP:
+			saveSubRip(stream);
+			break;
+		default:
+			throw new IOException("File format not supported.");
+		}
+	}
+	
+	/**
+	 * Converts lyrics to the LRC file format and writes it to an OutputStream.
+	 * Caller is responsible for flushing and closing the OutputStream.
+	 * @param stream OutputStream to write to.
+	 * @throws IOException
+	 */
+	private void saveLRC(OutputStream stream) throws IOException {
+		StringBuilder output = new StringBuilder();
+		for (int i = 0; i < subtitles.size() - 1; ++i) {
+			output.append(String.format(Locale.US, "%s%s%n",
+			                            millisecondsToLRCTimeFormat(startPositions.get(i)),
+			                            subtitles.get(i)));
+			
+			// Check if there's a break between the next subtitle.
+			if ((i + 1 < subtitles.size()) &&
+			    (endPositions.get(i) != startPositions.get(i + 1))) {
+				output.append(String.format(Locale.US, "%s%n",
+				                            millisecondsToLRCTimeFormat(endPositions.get(i))));
+			}
+		}
+		output.append(String.format(Locale.US, "%s%n",
+		                            millisecondsToLRCTimeFormat(endPositions.get(endPositions.size() - 1))));
+		
+		stream.write(output.toString().getBytes());
+	}
+	
+	/**
 	 * Converts lyrics to the SubRip file format and writes it to an OutputStream.
 	 * Caller is responsible for flushing and closing the OutputStream.
 	 * @param stream OutputStream to write to.
 	 * @throws IOException
 	 */
-	public void saveSubRip(OutputStream stream) throws IOException {
-		stream.write(toSubRip().getBytes());
+	private void saveSubRip(OutputStream stream) throws IOException {
+		StringBuilder output = new StringBuilder();
+		for (int i = 0; i < subtitles.size(); ++i) {
+			output.append(String.format(Locale.US, "%s%n%s --> %s%n%s%n%n",
+			                            String.format(Locale.US, "%d", i + 1),
+			                            millisecondsToSubRipTimeFormat(startPositions.get(i)),
+			                            millisecondsToSubRipTimeFormat(endPositions.get(i)),
+			                            subtitles.get(i)));
+		}
+		
+		stream.write(output.toString().getBytes());
 	}
 	
 	/**
-	 * Converts SubRip's time to milliseconds.
+	 * Converts SubRip time to milliseconds.
 	 * @param timeComponents An array of String in the format of: hours, minutes, seconds, milliseconds
 	 * @return Milliseconds.
 	 */
@@ -190,26 +324,5 @@ public class Lyrics {
 		milliseconds += Long.parseLong(timeComponents[3]);
 		
 		return milliseconds;
-	}
-	
-	/**
-	 * Converts lyrics to the SubRip text file format.
-	 * @return SubRip file text. <code>null</code> if there are no subtitles.
-	 */
-	private String toSubRip() {
-		if (subtitles.size() == 0) {
-			return null;
-		}
-		
-		StringBuilder subRip = new StringBuilder();
-		for (int i = 0; i < subtitles.size(); ++i) {
-			subRip.append(String.format(Locale.US, "%s%n%s --> %s%n%s%n%n",
-			                            String.format(Locale.US, "%d", i + 1),
-			                            millisecondsToSubRipTimeFormat(startPositions.get(i)),
-			                            millisecondsToSubRipTimeFormat(endPositions.get(i)),
-			                            subtitles.get(i)));
-		}
-		
-		return subRip.toString();
 	}
 }
