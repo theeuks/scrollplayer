@@ -373,9 +373,9 @@ public class AndroidBuildingMusicPlayerActivity extends Activity implements OnCo
 			songProgressBar.setProgress(progress);
 
 			// Update lyrics text.
-			String lyricsText = lyrics.getSubtitle(currentDuration).text;
-			if (lyricsText != null) {
-				lyricsLabel.setText(lyricsText);
+			LyricLine currentLine = lyrics.getSubtitle(currentDuration);
+			if (currentLine != null) {
+				lyricsLabel.setText(currentLine.text);
 			} else {
 				lyricsLabel.setText("");
 			}

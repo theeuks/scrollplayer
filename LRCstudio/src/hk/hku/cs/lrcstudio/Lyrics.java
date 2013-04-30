@@ -92,18 +92,16 @@ public class Lyrics {
 	public LyricLine getSubtitle(Integer position, int startLine) {
 		// NOTE(kent): Lyric endPosition values are currently ignored due to LRC support
 
-		int lineIndex = lines.size() - 1;
-		while (lineIndex >= 0) {
+		LyricLine currentLine = null;
+		for (int lineIndex = startLine; lineIndex < lines.size(); lineIndex++) {
 			LyricLine line = lines.get(lineIndex);
 
-			if (position >= line.startPosition) {
-				continue;
-			} else {
-				return line;
+			if (line.startPosition <= position) {
+				currentLine = line;
 			}
 		}
 
-		return null;
+		return currentLine;
 	}
 
 	/**
