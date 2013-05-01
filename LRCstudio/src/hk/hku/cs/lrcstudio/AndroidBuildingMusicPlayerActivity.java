@@ -640,7 +640,7 @@ public class AndroidBuildingMusicPlayerActivity extends Activity implements OnCo
 		data=data.replaceAll("&#","");
 		data=data.replaceAll("<b>","");
 		data=data.replaceAll("</b>","");
-		data=data.replaceAll("&#10","");
+		data=data.replaceAll("&#10;","");
 		data=data.replaceAll("<p>","");
 		data=data.replaceAll("<br /><br />","<br />");
 		while(data.indexOf("<br />")>0){
