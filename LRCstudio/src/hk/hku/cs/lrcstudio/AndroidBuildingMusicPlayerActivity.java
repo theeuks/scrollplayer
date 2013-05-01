@@ -3,6 +3,8 @@ package hk.hku.cs.lrcstudio;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -21,6 +23,7 @@ import org.apache.http.util.ByteArrayBuffer;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.graphics.Color;
 import android.media.MediaPlayer;
 import android.media.MediaPlayer.OnCompletionListener;
 import android.os.Bundle;
@@ -75,7 +78,7 @@ public class AndroidBuildingMusicPlayerActivity extends Activity implements OnCo
 
 	// Lyrics for the current song.
 	private Lyrics lyrics;
-	
+	private ArrayList<Boolean> clickStatus;
 	private Lyrics editing_lyrics;
 
 	@Override
@@ -485,7 +488,23 @@ public class AndroidBuildingMusicPlayerActivity extends Activity implements OnCo
 		}
 		else{
 			mp.pause();
+			mp.seekTo(0);
 			btnPlay.setImageResource(R.drawable.btn_play);
+			editing_lyrics.removeNullTimeLine();
+			FileOutputStream fs = null;
+			try {
+				fs = new FileOutputStream(songTitle);
+			} catch (FileNotFoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+			try {
+				editing_lyrics.save(fs, Lyrics.Format.LRC);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 	}
 
@@ -593,12 +612,14 @@ public class AndroidBuildingMusicPlayerActivity extends Activity implements OnCo
 	
 	public void InitialRecorder(String url){
 		
+
 		ArrayList<String> tmplyrics = new ArrayList<String>();
 
     	tmplyrics = SendHttpRequest(url);
 
        	ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1 ,tmplyrics);
     	lv.setAdapter(adapter);
+    	lv.setSelector(R.drawable.list_selector);
     	
     	editing_lyrics = new Lyrics();
     	
@@ -606,6 +627,9 @@ public class AndroidBuildingMusicPlayerActivity extends Activity implements OnCo
     		editing_lyrics.addSubtitle(tmpline);
     	}
     	
+    	clickStatus = new ArrayList<Boolean>();
+    	
+    	for (int i = 0; i < tmplyrics.size(); i++) clickStatus.add(false);
     	
     	lv.setOnItemClickListener(new OnItemClickListener(){
 
@@ -613,7 +637,24 @@ public class AndroidBuildingMusicPlayerActivity extends Activity implements OnCo
 					int arg2, long arg3) {
 				// TODO Auto-generated method stub
 				
-				
+				if (!clickStatus.get(arg2)){
+					arg1.setBackgroundColor(Color.CYAN);
+					clickStatus.set(arg2, true);
+					
+					LyricLine tmpLine = editing_lyrics.getLyricLineDirect(arg2);
+					tmpLine.endPosition = mp.getCurrentPosition();
+					tmpLine.startPosition = mp.getCurrentPosition();
+					
+				}
+				else{
+					arg1.setBackgroundColor(Color.BLACK);
+					clickStatus.set(arg2, false);
+					
+					LyricLine tmpLine = editing_lyrics.getLyricLineDirect(arg2);
+					tmpLine.endPosition = null;
+					tmpLine.startPosition = null;
+					
+				}
 				
 				
 			}});

@@ -112,6 +112,10 @@ public class Lyrics {
 
 		return currentLine;
 	}
+	
+	public LyricLine getLyricLineDirect(int position){
+		return lines.get(position);
+	}
 
 	/**
 	 * Overwrites current data with data from an external lyrics file.
@@ -342,4 +346,17 @@ public class Lyrics {
 
 		return milliseconds;
 	}
+
+	public void removeNullTimeLine(){
+		
+		int index = 0;
+		while (index < lines.size() ){
+			
+			if (lines.get(index).startPosition == null) lines.remove(index);
+			else index++;
+			
+		}
+		
+	}
+
 }
