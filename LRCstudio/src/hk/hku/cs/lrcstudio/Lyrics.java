@@ -72,6 +72,15 @@ public class Lyrics {
 		LyricLine newLine = new LyricLine(text, startPosition, endPosition);
 		lines.add(newLine);
 	}
+	
+	/**
+	 * Changes a subtitle at a given index to the passed line
+	 * @param text the new lyric line
+	 * @param Position the index of the list that needs to be changed
+	 */
+	public void changeSubtitle(LyricLine text, Integer Position){
+		lines.set(Position,text);
+	}
 
 	/**
 	 * Clear playback positions and subtitles.
