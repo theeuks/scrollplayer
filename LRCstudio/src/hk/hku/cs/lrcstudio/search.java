@@ -79,12 +79,17 @@ public class search extends Activity {
     	lv.setAdapter(adapter);
   	  lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
       	  public void onItemClick(AdapterView<?> arg0, View arg1, int position, long arg3) {
-      		  	Intent intent = new Intent(getApplicationContext(), LyricsParser.class);
-      		  	
-      		  	intent.putExtra("Song Name", fillMaps.get(position).get("artist").toString());
-      		  	intent.putExtra("URL", fillMaps.get(position).get("URL").toString());
-      		  	//intent.setData(Uri.parse(fillMaps.get(position).get("URL").toString()));
-      	    	startActivity(intent);
+      		Intent intent = new Intent();
+  		  	
+  		  	//intent.putExtra("Song Name", fillMaps.get(position).get("artist").toString());
+  		  	Bundle bundle = new Bundle();
+  		  	bundle.putString("URL", fillMaps.get(position).get("URL").toString());
+  		  	intent.putExtras(bundle);
+  		  	
+  		  	
+  		  	//intent.setData(Uri.parse(fillMaps.get(position).get("URL").toString()));
+  	    	setResult(RESULT_OK, intent);
+  	    	finish();
       	  }
       	});  
     
