@@ -12,6 +12,7 @@ import java.util.concurrent.TimeUnit;
 
 import android.annotation.TargetApi;
 import android.os.Build;
+import android.util.Log;
 
 /**
  * Stores a list of subtitles and their respective start and end position.
@@ -298,6 +299,7 @@ public class Lyrics {
 			outputBuilder.append(lineString);
 		}
 
+		Log.i("output", outputBuilder.toString());
 		stream.write(outputBuilder.toString().getBytes());
 	}
 

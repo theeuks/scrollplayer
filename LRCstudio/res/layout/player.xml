@@ -6,7 +6,7 @@
 
     <!-- Player Header -->
 
-    <LinearLayout
+    <RelativeLayout
         android:id="@+id/player_header_bg"
         android:layout_width="fill_parent"
         android:layout_height="60dip"
@@ -17,34 +17,42 @@
 
         <!-- Song Title -->
 
-        <ImageView
-            android:layout_width="60dp"
-            android:layout_height="60dp"
-            android:layout_weight="1"
-            android:src="@drawable/adele" />
 
-        <TextView
-            android:id="@+id/songTitle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:layout_weight="1"
-            android:paddingLeft="10dp"
-            android:text="The Good, The Bad And The Ugly"
-            android:textColor="#04b3d2"
-            android:textSize="16dp"
-            android:textStyle="bold" />
-        
-        
         <!-- Playlist button -->
 
         <ImageButton
             android:id="@+id/btnPlaylist"
             android:layout_width="wrap_content"
             android:layout_height="fill_parent"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentTop="true"
             android:background="@null"
             android:src="@drawable/btn_playlist" />
-    </LinearLayout>
+
+        <ImageView
+            android:id="@+id/imageView1"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentTop="true"
+            android:layout_weight="1"
+            android:src="@drawable/adele" />
+
+        <TextView
+            android:id="@+id/songTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_toLeftOf="@+id/btnPlaylist"
+            android:layout_toRightOf="@+id/imageView1"
+            android:layout_weight="1"
+            android:paddingLeft="10dp"
+            android:text="The Good, The Bad And The Ugly"
+            android:textColor="#04b3d2"
+            android:textSize="16dp"
+            android:textStyle="bold" />
+
+    </RelativeLayout>
 
     <!-- Song Thumbnail Image -->
 

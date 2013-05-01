@@ -7,6 +7,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -22,6 +23,8 @@ import org.apache.http.protocol.HTTP;
 import org.apache.http.util.ByteArrayBuffer;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
 import android.media.MediaPlayer;
@@ -103,6 +106,7 @@ public class AndroidBuildingMusicPlayerActivity extends Activity implements OnCo
 		btnLyrics = (Button) findViewById(R.id.btnLyrics);
 
 		lv= (ListView)findViewById(R.id.lyricsview);
+		lv.setVisibility(View.GONE);
 		
 		// Mediaplayer
 		mp = new MediaPlayer();
@@ -200,15 +204,19 @@ public class AndroidBuildingMusicPlayerActivity extends Activity implements OnCo
 
 			public void onClick(View arg0) {
 				// check if next song is there or not
-				if(currentSongIndex < (songsList.size() - 1)){
-					playSong(currentSongIndex + 1);
-					currentSongIndex = currentSongIndex + 1;
-				}else{
-					// play first song
-					playSong(0);
-					currentSongIndex = 0;
+				if (!EditorMode){
+					if(currentSongIndex < (songsList.size() - 1)){
+						playSong(currentSongIndex + 1);
+						currentSongIndex = currentSongIndex + 1;
+					}else{
+						// play first song
+						playSong(0);
+						currentSongIndex = 0;
+					}
 				}
-
+				else{
+					mp.seekTo(mp.getDuration());
+				}
 			}
 		});
 
@@ -220,13 +228,22 @@ public class AndroidBuildingMusicPlayerActivity extends Activity implements OnCo
 
 
 			public void onClick(View arg0) {
-				if(currentSongIndex > 0){
-					playSong(currentSongIndex - 1);
-					currentSongIndex = currentSongIndex - 1;
-				}else{
-					// play last song
-					playSong(songsList.size() - 1);
-					currentSongIndex = songsList.size() - 1;
+				
+				if (!EditorMode){
+				
+					if(currentSongIndex > 0){
+						playSong(currentSongIndex - 1);
+						currentSongIndex = currentSongIndex - 1;
+					}else{
+						// play last song
+						playSong(songsList.size() - 1);
+						currentSongIndex = songsList.size() - 1;
+					}
+				}
+				else {
+					
+					mp.seekTo(0);
+					
 				}
 
 			}
@@ -302,8 +319,9 @@ public class AndroidBuildingMusicPlayerActivity extends Activity implements OnCo
 
 			public void onClick(View arg0) {
 
+				mp.pause();
+				mp.seekTo(0);
 				RecorderUI();
-				EditorMode = true;
 				
 			}
 		});
@@ -318,6 +336,8 @@ public class AndroidBuildingMusicPlayerActivity extends Activity implements OnCo
 	 * and play the song
 	 * */
 
+	
+	
 	@Override
 	protected void onActivityResult(int requestCode,
 			int resultCode, Intent data) {
@@ -338,6 +358,37 @@ public class AndroidBuildingMusicPlayerActivity extends Activity implements OnCo
         	
         }
 
+	}
+
+	@Override
+	public void onBackPressed() {
+		// TODO Auto-generated method stub
+		if (!EditorMode)super.onBackPressed();
+		else {
+			
+			DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
+			    public void onClick(DialogInterface dialog, int which) {
+			        switch (which){
+			        case DialogInterface.BUTTON_POSITIVE:
+			        	PlayerUI();
+			            //Yes button clicked
+			            break;
+
+			        case DialogInterface.BUTTON_NEGATIVE:
+			            //No button clicked
+			            break;
+			        }
+			    }
+			};
+
+			AlertDialog.Builder builder = new AlertDialog.Builder(this);
+			builder.setMessage("Discard edited lyrics?").setPositiveButton("Yes", dialogClickListener)
+			    .setNegativeButton("No", dialogClickListener).show();
+			
+		}
+		
+		
+		
 	}
 
 	/**
@@ -487,24 +538,7 @@ public class AndroidBuildingMusicPlayerActivity extends Activity implements OnCo
 			}
 		}
 		else{
-			mp.pause();
-			mp.seekTo(0);
-			btnPlay.setImageResource(R.drawable.btn_play);
-			editing_lyrics.removeNullTimeLine();
-			FileOutputStream fs = null;
-			try {
-				fs = new FileOutputStream(songTitle);
-			} catch (FileNotFoundException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			
-			try {
-				editing_lyrics.save(fs, Lyrics.Format.LRC);
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+			editorEnd();
 		}
 	}
 
@@ -520,11 +554,27 @@ public class AndroidBuildingMusicPlayerActivity extends Activity implements OnCo
 		btnRepeat.setVisibility(View.GONE);
 		btnShuffle.setVisibility(View.GONE);
 		btnLyrics.setVisibility(View.GONE);
+		lv.setVisibility(View.VISIBLE);
+		
+		
+		EditorMode = true;
 		
 		Intent i = new Intent(this, search.class);
 		i.putExtra("query", songTitle);
 		startActivityForResult(i, EDITOR);
 
+	}
+	
+	private void PlayerUI(){
+		
+		btnRepeat.setVisibility(View.VISIBLE);
+		btnShuffle.setVisibility(View.VISIBLE);
+		btnLyrics.setVisibility(View.VISIBLE);
+		lv.setVisibility(View.GONE);
+		editing_lyrics = null;
+		clickStatus = null;
+		EditorMode = false;
+		
 	}
 	
 	private ArrayList<String> SendHttpRequest(String url){
@@ -659,7 +709,55 @@ public class AndroidBuildingMusicPlayerActivity extends Activity implements OnCo
 				
 			}});
 		
+    	mp.start();
+    	
 	}
 	
+	private void editorEnd(){
+		
+		mp.pause();
+		mp.seekTo(0);
+		btnPlay.setImageResource(R.drawable.btn_play);
+		editing_lyrics.removeNullTimeLine();
+		
+		DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
+		    public void onClick(DialogInterface dialog, int which) {
+		        switch (which){
+		        case DialogInterface.BUTTON_POSITIVE:
+		            //Yes button clicked
+		        	OutputStream fs = null;
+		        	try {
+		    			fs = new FileOutputStream("/sdcard/Music/" + songTitle + ".lrc");
+		    		} catch (FileNotFoundException e) {
+		    			// TODO Auto-generated catch block
+		    			e.printStackTrace();
+		    		}
+		    		
+		    		try {
+		    			editing_lyrics.save(fs, Lyrics.Format.LRC);
+		    		} catch (IOException e) {
+		    			// TODO Auto-generated catch block
+		    			e.printStackTrace();
+		    		}
+		    		
+		    		PlayerUI();
+		    		
+		            break;
+
+		        case DialogInterface.BUTTON_NEGATIVE:
+		            //No button clicked
+		            break;
+		        }
+		    }
+		};
+
+		AlertDialog.Builder builder = new AlertDialog.Builder(this);
+		builder.setMessage("Save lyrics?").setPositiveButton("Yes", dialogClickListener)
+		    .setNegativeButton("No", dialogClickListener).show();
+		
+		
+		
+		
+	}
 	
 }
