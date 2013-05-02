@@ -120,7 +120,7 @@ public class Lyrics {
 	
 	public int getLyricsPositionInList(int time){
 		
-		for (int i = lines.size() - 1; i < lines.size(); i--){
+		for (int i = lines.size() - 1; i >= 0; i--){
 			
 			if (getLyricLineDirect(i).startPosition <= time) return i;
 			
