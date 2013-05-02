@@ -578,100 +578,14 @@ public class AndroidBuildingMusicPlayerActivity extends Activity implements OnCo
 		
 	}
 	
-	private ArrayList<String> SendHttpRequest(String url){
-        
-		String  text = null;
-        try {
-              HttpClient httpclient = new DefaultHttpClient();  
-              HttpPost httppost = new HttpPost(url);  
-              
-              
-              List nameValuePairs = new ArrayList();  
-              //nameValuePairs.add(new BasicNameValuePair("data", "Atul Yadav"));   
-              httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs,HTTP.UTF_8));  
-
-              // Execute HTTP Post Request  
-              HttpResponse response = httpclient.execute(httppost);
-              
-              InputStream is = response.getEntity().getContent();
-              BufferedInputStream bis = new BufferedInputStream(is);
-              ByteArrayBuffer baf = new ByteArrayBuffer(20);
-
-               int current = 0;  
-               while((current = bis.read()) != -1){  
-                   baf.append((byte)current);  
-               }  
-                
-              /* Convert the Bytes read to a String. */
-               //TextView lbl = (TextView) findViewById(R.id.tv1);
-               text = new String(baf.toByteArray());
-               
-               //lbl.setText(text);
-             
-
-           } catch (ClientProtocolException e) {  
-               // TODO Auto-generated catch block 
-                //TextView lbl = (TextView) findViewById(R.id.tv1);
-                //lbl.setText(e.getMessage());
-               
-          } catch (IOException e) {  
-               // TODO Auto-generated catch block 
-                //TextView lbl = (TextView) findViewById(R.id.tv1);
-                //lbl.setText(e.getMessage());
-             
-          }  
-		
-		
-			return ResultFilter(text);
-	}
 	
-	private ArrayList<String> ResultFilter(String data){
-	   
-		ArrayList<String> lyrics = new ArrayList<String>();
-		boolean gracenote = false; 
-		String artist="";
-		String url="";
-		if(data.contains("uneditable Gracenote version")){
-			gracenote=true;
-		}
-		data=data.substring(data.indexOf("<div class='lyricbox'>"));
-
-		data=data.substring(data.indexOf("</div>")+6);
-		data=data.substring(0,data.indexOf("<div class=\'rt")-1);
-		data=data.replaceAll("&#","");
-		data=data.replaceAll("<b>","");
-		data=data.replaceAll("</b>","");
-		data=data.replaceAll("&#10;","");
-		data=data.replaceAll("<p>","");
-		data=data.replaceAll("<br /><br />","<br />");
-		while(data.indexOf("<br />")>0){
-			String currentline=data.substring(0,data.indexOf("<br />"));
-			
-			String lyric="";
-			if(gracenote){
-				currentline=currentline.substring(1);
-				gracenote=false;
-			}
-			String [] Temp_array=currentline.split(";");
-
-			for (int i = 0; i < Temp_array.length; i++) { 
-				lyric+=(char) Integer.parseInt(Temp_array[i]);
-			}
-			lyrics.add(lyric);
-			data=data.substring(data.indexOf("<br />")+6,data.length());
-
-		}
-	
-		return lyrics;
-
-	}
 	
 	public void InitialRecorder(String url){
 		
 
 		ArrayList<String> tmplyrics = new ArrayList<String>();
 
-    	tmplyrics = SendHttpRequest(url);
+    	tmplyrics = utils.SendHttpRequest(url);
 
        	//ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1 ,tmplyrics);
     	adapter = new LyricsAdapter(this,R.layout.lyricsline,tmplyrics);
