@@ -78,6 +78,7 @@ public class AndroidBuildingMusicPlayerActivity extends Activity implements OnCo
 	private boolean isRepeat = false;
 	private ArrayList<HashMap<String, String>> songsList = new ArrayList<HashMap<String, String>>();
 	private boolean EditorMode = false;
+	private LyricsAdapter adapter;
 
 	// Lyrics for the current song.
 	private Lyrics lyrics;
@@ -658,12 +659,7 @@ public class AndroidBuildingMusicPlayerActivity extends Activity implements OnCo
 			}
 			lyrics.add(lyric);
 			data=data.substring(data.indexOf("<br />")+6,data.length());
-			Log.v("currentline",data);
-		}
-		for (int i = 0; i < lyrics.size(); i++) {
-		    if(!lyrics.get(i).equals(null)){
-		        Log.v("data",lyrics.get(i));
-		    }
+
 		}
 	
 		return lyrics;
@@ -677,7 +673,8 @@ public class AndroidBuildingMusicPlayerActivity extends Activity implements OnCo
 
     	tmplyrics = SendHttpRequest(url);
 
-       	ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1 ,tmplyrics);
+       	//ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1 ,tmplyrics);
+    	adapter = new LyricsAdapter(this,R.layout.lyricsline,tmplyrics);
     	lv.setAdapter(adapter);
     	lv.setSelector(R.drawable.list_selector);
     	
@@ -690,7 +687,8 @@ public class AndroidBuildingMusicPlayerActivity extends Activity implements OnCo
     	clickStatus = new ArrayList<Boolean>();
     	
     	for (int i = 0; i < tmplyrics.size(); i++) clickStatus.add(false);
-    	
+    	adapter.clickStatus=clickStatus;
+    	Log.v("size of clickstatus",""+adapter.clickStatus.size());
     	lv.setOnItemClickListener(new OnItemClickListener(){
 
 			public void onItemClick(AdapterView<?> arg0, View arg1,
@@ -700,7 +698,7 @@ public class AndroidBuildingMusicPlayerActivity extends Activity implements OnCo
 				if (!clickStatus.get(arg2)){
 					arg1.setBackgroundColor(Color.CYAN);
 					clickStatus.set(arg2, true);
-					
+					adapter.clickStatus.set(arg2,true);
 					LyricLine tmpLine = editing_lyrics.getLyricLineDirect(arg2);
 					tmpLine.endPosition = mp.getCurrentPosition();
 					tmpLine.startPosition = mp.getCurrentPosition();
@@ -709,13 +707,13 @@ public class AndroidBuildingMusicPlayerActivity extends Activity implements OnCo
 				else{
 					arg1.setBackgroundColor(Color.BLACK);
 					clickStatus.set(arg2, false);
-					
+					adapter.clickStatus.set(arg2,false);
 					LyricLine tmpLine = editing_lyrics.getLyricLineDirect(arg2);
 					tmpLine.endPosition = null;
 					tmpLine.startPosition = null;
 					
 				}
-				lv.smoothScrollToPosition(arg2+3);
+				lv.smoothScrollToPosition(arg2+4);
 				
 				
 			}});
