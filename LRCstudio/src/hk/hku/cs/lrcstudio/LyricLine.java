@@ -1,6 +1,6 @@
 package hk.hku.cs.lrcstudio;
 
-public class LyricLine {
+public class LyricLine implements Comparable<LyricLine> {
 	// TODO(kent): Encapsulate and remove public access
 	public Integer startPosition;
 	public Integer endPosition;
@@ -18,5 +18,9 @@ public class LyricLine {
 		this.text = text;
 		this.startPosition = startPosition;
 		this.endPosition = endPosition;
+	}
+	
+	public int compareTo(LyricLine line) {
+		return startPosition.compareTo(line.startPosition);
 	}
 }

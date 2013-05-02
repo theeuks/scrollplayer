@@ -64,7 +64,7 @@ public class AndroidBuildingMusicPlayerActivity extends Activity implements OnCo
 	private ImageButton btnPlaylist;
 	private ImageButton btnRepeat;
 	private ImageButton btnShuffle;
-	private Button btnLyrics;
+	private ImageButton btnLyrics;
 	private SeekBar songProgressBar;
 	private TextView songTitleLabel;
 	private TextView songCurrentDurationLabel;
@@ -121,7 +121,7 @@ public class AndroidBuildingMusicPlayerActivity extends Activity implements OnCo
 		lyricsLabel = (TextView) findViewById(R.id.lyricsLabel);
 		lyricsLabel_prev = (TextView) findViewById(R.id.lyricsLabel_prev);
 		lyricsLabel_next = (TextView) findViewById(R.id.lyricsLabel_next);
-		btnLyrics = (Button) findViewById(R.id.btnLyrics);
+		btnLyrics = (ImageButton) findViewById(R.id.btnLyrics);
 
 		lv= (ListView)findViewById(R.id.lyricsview);
 		lv.setVisibility(View.GONE);
@@ -343,6 +343,8 @@ public class AndroidBuildingMusicPlayerActivity extends Activity implements OnCo
 
 				mp.pause();
 				mp.seekTo(0);
+				btnPlay.setImageResource(R.drawable.btn_play);
+				clearAllLyrics();
 				RecorderUI();
 				
 			}
@@ -381,6 +383,21 @@ public class AndroidBuildingMusicPlayerActivity extends Activity implements OnCo
             	
             	String url=data.getExtras().getString("URL");
             	InitialRecorder(url);
+            	
+            	btnRepeat.setVisibility(View.GONE);
+        		btnShuffle.setVisibility(View.GONE);
+        		btnLyrics.setVisibility(View.GONE);
+        		lv.setVisibility(View.VISIBLE);
+        		lyricsLabel.setVisibility(View.GONE);
+        		lyricsLabel_prev.setVisibility(View.GONE);
+        		lyricsLabel_next.setVisibility(View.GONE);
+        		
+        	}
+        	if (resultCode == RESULT_CANCELED){
+        		
+        		PlayerUI();
+        		
+        		
         	}
         	
         }
@@ -502,37 +519,40 @@ public class AndroidBuildingMusicPlayerActivity extends Activity implements OnCo
 			songProgressBar.setProgress(progress);
 
 			// Update lyrics text.
-			LyricLine currentLine = lyrics.getSubtitle(currentDuration);
-			if (currentLine != null) {
-				lyricsLabel.setText(currentLine.text);
-			} else {
-				lyricsLabel.setText("");
-			}
-			
-			
-			int prevIndex = lyrics.getLyricsPositionInList(currentDuration) - 1;
-			if (prevIndex < 0) lyricsLabel_prev.setText("");
-			else{
-				LyricLine prevLine = lyrics.getLyricLineDirect(prevIndex);
-				if (prevLine != null) {
-					lyricsLabel_prev.setText(prevLine.text);
+			if (!EditorMode){
+				LyricLine currentLine = lyrics.getSubtitle(currentDuration);
+				if (currentLine != null) {
+					lyricsLabel.setText(currentLine.text);
 				} else {
-					lyricsLabel_prev.setText("");
-				}
-			}
-			
-			int nextIndex = lyrics.getLyricsPositionInList(currentDuration) + 1;
-			if (nextIndex == lyrics.getLyricsListSize()) lyricsLabel_next.setText("");
-			else{
-				
-				LyricLine nextLine = lyrics.getLyricLineDirect(nextIndex);
-				if (nextLine != null) {
-					lyricsLabel_next.setText(nextLine.text);
-				} else {
-					lyricsLabel_next.setText("");
+					lyricsLabel.setText("");
 				}
 				
+				if (lyrics.getLyricsListSize() != 0){
+					int prevIndex = lyrics.getLyricsPositionInList(currentDuration) - 1;
+					if (prevIndex < 0) lyricsLabel_prev.setText("");
+					else{
+						LyricLine prevLine = lyrics.getLyricLineDirect(prevIndex);
+						if (prevLine != null) {
+							lyricsLabel_prev.setText(prevLine.text);
+						} else {
+							lyricsLabel_prev.setText("");
+						}
+					}
+					
+					int nextIndex = lyrics.getLyricsPositionInList(currentDuration) + 1;
+					if (nextIndex == lyrics.getLyricsListSize() && nextIndex > 0) lyricsLabel_next.setText("");
+					else{
+						
+						LyricLine nextLine = lyrics.getLyricLineDirect(nextIndex);
+						if (nextLine != null) {
+							lyricsLabel_next.setText(nextLine.text);
+						} else {
+							lyricsLabel_next.setText("");
+						}
+					}
+				}else clearAllLyrics();
 			}
+			else clearAllLyrics();
 			
 			
 
@@ -617,12 +637,6 @@ public class AndroidBuildingMusicPlayerActivity extends Activity implements OnCo
 
 	public void RecorderUI(){
 		
-		btnRepeat.setVisibility(View.GONE);
-		btnShuffle.setVisibility(View.GONE);
-		btnLyrics.setVisibility(View.GONE);
-		lv.setVisibility(View.VISIBLE);
-		
-		
 		EditorMode = true;
 		
 		Intent i = new Intent(this, search.class);
@@ -641,6 +655,9 @@ public class AndroidBuildingMusicPlayerActivity extends Activity implements OnCo
 		editing_lyrics = null;
 		clickStatus = null;
 		EditorMode = false;
+		lyricsLabel.setVisibility(View.VISIBLE);
+		lyricsLabel_prev.setVisibility(View.VISIBLE);
+		lyricsLabel_next.setVisibility(View.VISIBLE);
 		
 	}
 	
@@ -723,6 +740,7 @@ public class AndroidBuildingMusicPlayerActivity extends Activity implements OnCo
 		    		}
 		    		
 		    		try {
+		    			editing_lyrics.sortList();
 		    			editing_lyrics.save(fs, Lyrics.Format.LRC);
 		    		} catch (IOException e) {
 		    			// TODO Auto-generated catch block
@@ -730,6 +748,8 @@ public class AndroidBuildingMusicPlayerActivity extends Activity implements OnCo
 		    		}
 		    		
 		    		PlayerUI();
+		    		
+		    		playSong(currentSongIndex);
 		    		
 		            break;
 
@@ -744,8 +764,13 @@ public class AndroidBuildingMusicPlayerActivity extends Activity implements OnCo
 		builder.setMessage("Save lyrics?").setPositiveButton("Yes", dialogClickListener)
 		    .setNegativeButton("No", dialogClickListener).show();
 		
+	}
+	
+	private void clearAllLyrics(){
 		
-		
+		lyricsLabel.setText("");
+		lyricsLabel_prev.setText("");
+		lyricsLabel_next.setText("");
 		
 	}
 	
