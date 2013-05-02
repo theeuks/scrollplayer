@@ -226,21 +226,24 @@
         android:background="@null"
         android:src="@drawable/btn_shuffle" />
 
-    <Button
+    <ImageButton
         android:id="@+id/btnLyrics"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_above="@+id/timerDisplay"
         android:layout_toRightOf="@+id/btnRepeat"
-        android:text="Lyrics" />
+         android:background="@null"
+        android:src="@drawable/img_btn_lyric"/>
 
     <TextView
         android:id="@+id/lyricsLabel_next"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="100dp"
         android:layout_centerInParent="true"
+        android:layout_marginLeft="30dp"
+        android:layout_marginRight="30dp"
         android:gravity="center_horizontal"
-        android:text="Next lyrics"
+        android:text=""
         android:textColor="@color/grey" />
 
     <TextView
@@ -249,9 +252,14 @@
         android:layout_height="wrap_content"
         android:layout_above="@+id/lyricsLabel_next"
         android:layout_centerHorizontal="true"
+        android:layout_marginBottom="20dp"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:layout_marginTop="20dp"
         android:gravity="center_horizontal"
-        android:text="Current lyrics"
-        android:textColor="@color/white"/>"
+        android:text=""
+        android:textColor="@color/white" />
+
     
     <TextView
         android:id="@+id/lyricsLabel_prev"
@@ -259,8 +267,11 @@
         android:layout_height="wrap_content"
         android:layout_above="@+id/lyricsLabel"
         android:layout_centerHorizontal="true"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:layout_marginTop="20dp"
         android:gravity="center_horizontal"
-        android:text="Previous lyrics"
+        android:text=""
         android:textColor="@color/grey" />
 
 </RelativeLayout>
