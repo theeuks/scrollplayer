@@ -239,6 +239,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
+        android:gravity="center_horizontal"
         android:text="Next lyrics"
         android:textColor="@color/grey" />
 
@@ -248,6 +249,7 @@
         android:layout_height="wrap_content"
         android:layout_above="@+id/lyricsLabel_next"
         android:layout_centerHorizontal="true"
+        android:gravity="center_horizontal"
         android:text="Current lyrics"
         android:textColor="@color/white"/>"
     
@@ -257,6 +259,7 @@
         android:layout_height="wrap_content"
         android:layout_above="@+id/lyricsLabel"
         android:layout_centerHorizontal="true"
+        android:gravity="center_horizontal"
         android:text="Previous lyrics"
         android:textColor="@color/grey" />
 
