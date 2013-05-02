@@ -371,11 +371,11 @@ public class AndroidBuildingMusicPlayerActivity extends Activity implements OnCo
 			// play selected song
 			playSong(currentSongIndex);
 		}
-		else{
+		/*else{
 			PlayerUI();
 			btnPlay.setImageResource(R.drawable.btn_play);
 			return;
-		}
+		}*/
 		if (requestCode == EDITOR){
         	
         	if (resultCode == RESULT_OK){
