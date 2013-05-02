@@ -1,5 +1,7 @@
 package hk.hku.cs.lrcstudio;
 
+import hk.hku.cs.lrcstudio.R.drawable;
+
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -29,6 +31,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.media.MediaMetadataRetriever;
 import android.media.MediaPlayer;
 import android.media.MediaPlayer.OnCompletionListener;
@@ -425,6 +428,10 @@ public class AndroidBuildingMusicPlayerActivity extends Activity implements OnCo
 			byte[] art = Mdr.getEmbeddedPicture();
 			if (art != null) {
 				albumArt.setImageBitmap(BitmapFactory.decodeByteArray(art, 0, art.length));
+			}
+			else{
+				
+				albumArt.setImageDrawable(getResources().getDrawable(R.drawable.adele));
 			}
 			
 			// Displaying Song title
