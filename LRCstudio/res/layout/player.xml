@@ -208,14 +208,6 @@
         </ListView>
     </RelativeLayout>
 
-    <TextView
-        android:id="@+id/lyricsLabel"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_above="@+id/player_footer_bg"
-        android:layout_centerHorizontal="true"
-        android:text="TextView" />
-
     <ImageButton
         android:id="@+id/btnRepeat"
         android:layout_width="wrap_content"
@@ -241,5 +233,31 @@
         android:layout_above="@+id/timerDisplay"
         android:layout_toRightOf="@+id/btnRepeat"
         android:text="Lyrics" />
+
+    <TextView
+        android:id="@+id/lyricsLabel_next"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:text="Next lyrics"
+        android:textColor="@color/grey" />
+
+    <TextView
+        android:id="@+id/lyricsLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/lyricsLabel_next"
+        android:layout_centerHorizontal="true"
+        android:text="Current lyrics"
+        android:textColor="@color/white"/>"
+    
+    <TextView
+        android:id="@+id/lyricsLabel_prev"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/lyricsLabel"
+        android:layout_centerHorizontal="true"
+        android:text="Previous lyrics"
+        android:textColor="@color/grey" />
 
 </RelativeLayout>

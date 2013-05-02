@@ -117,6 +117,24 @@ public class Lyrics {
 	public LyricLine getLyricLineDirect(int position){
 		return lines.get(position);
 	}
+	
+	public int getLyricsPositionInList(int time){
+		
+		for (int i = lines.size() - 1; i < lines.size(); i--){
+			
+			if (getLyricLineDirect(i).startPosition <= time) return i;
+			
+		}
+		
+		return -1;
+		
+	}
+	
+	public int getLyricsListSize (){
+		
+		return lines.size();
+		
+	}
 
 	/**
 	 * Overwrites current data with data from an external lyrics file.

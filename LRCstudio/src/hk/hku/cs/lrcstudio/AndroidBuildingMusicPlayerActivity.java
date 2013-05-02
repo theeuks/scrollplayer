@@ -70,6 +70,8 @@ public class AndroidBuildingMusicPlayerActivity extends Activity implements OnCo
 	private TextView songCurrentDurationLabel;
 	private TextView songTotalDurationLabel;
 	private TextView lyricsLabel;
+	private TextView lyricsLabel_prev;
+	private TextView lyricsLabel_next;
 	private ImageView albumArt;
 	
 	public ListView lv;
@@ -117,6 +119,8 @@ public class AndroidBuildingMusicPlayerActivity extends Activity implements OnCo
 		songCurrentDurationLabel = (TextView) findViewById(R.id.songCurrentDurationLabel);
 		songTotalDurationLabel = (TextView) findViewById(R.id.songTotalDurationLabel);
 		lyricsLabel = (TextView) findViewById(R.id.lyricsLabel);
+		lyricsLabel_prev = (TextView) findViewById(R.id.lyricsLabel_prev);
+		lyricsLabel_next = (TextView) findViewById(R.id.lyricsLabel_next);
 		btnLyrics = (Button) findViewById(R.id.btnLyrics);
 
 		lv= (ListView)findViewById(R.id.lyricsview);
@@ -499,6 +503,33 @@ public class AndroidBuildingMusicPlayerActivity extends Activity implements OnCo
 			} else {
 				lyricsLabel.setText("");
 			}
+			
+			
+			int prevIndex = lyrics.getLyricsPositionInList(currentDuration) - 1;
+			if (prevIndex < 0) lyricsLabel_prev.setText("");
+			else{
+				LyricLine prevLine = lyrics.getLyricLineDirect(prevIndex);
+				if (prevLine != null) {
+					lyricsLabel_prev.setText(prevLine.text);
+				} else {
+					lyricsLabel_prev.setText("");
+				}
+			}
+			
+			int nextIndex = lyrics.getLyricsPositionInList(currentDuration) + 1;
+			if (nextIndex == lyrics.getLyricsListSize()) lyricsLabel_next.setText("");
+			else{
+				
+				LyricLine nextLine = lyrics.getLyricLineDirect(nextIndex);
+				if (nextLine != null) {
+					lyricsLabel_next.setText(nextLine.text);
+				} else {
+					lyricsLabel_next.setText("");
+				}
+				
+			}
+			
+			
 
 			// Running this thread after 100 milliseconds
 			mHandler.postDelayed(this, 100);
