@@ -202,7 +202,7 @@ public class Lyrics {
 		milliseconds -= TimeUnit.MILLISECONDS.convert(seconds, TimeUnit.SECONDS);
 		long centiseconds = milliseconds / 10;
 
-		return String.format(Locale.US, "[%s:%s.%s]", minutes, seconds, centiseconds);
+		return String.format(Locale.US, "[%02d:%02d.%02d]", minutes, seconds, centiseconds);
 	}
 
 	/**
