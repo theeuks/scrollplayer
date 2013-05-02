@@ -5,20 +5,24 @@ import java.io.FilenameFilter;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import android.annotation.TargetApi;
+import android.media.MediaMetadataRetriever;
+import android.os.Build;
+
 public class SongsManager {
 	// SDCard Path
 	final String MEDIA_PATH = new String("/sdcard/Music");
 	private ArrayList<HashMap<String, String>> songsList = new ArrayList<HashMap<String, String>>();
-	
 	// Constructor
+	@TargetApi(Build.VERSION_CODES.GINGERBREAD_MR1)
 	public SongsManager(){
-		
 	}
 	
 	/**
 	 * Function to read all mp3 files from sdcard
 	 * and store the details in ArrayList
 	 * */
+	@TargetApi(Build.VERSION_CODES.GINGERBREAD_MR1)
 	public ArrayList<HashMap<String, String>> getPlayList(){
 		File home = new File(MEDIA_PATH);
 

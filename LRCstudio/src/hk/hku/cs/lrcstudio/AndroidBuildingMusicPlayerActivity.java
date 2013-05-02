@@ -22,13 +22,17 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.protocol.HTTP;
 import org.apache.http.util.ByteArrayBuffer;
 
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.media.MediaMetadataRetriever;
 import android.media.MediaPlayer;
 import android.media.MediaPlayer.OnCompletionListener;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
@@ -38,6 +42,7 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.SeekBar;
 import android.widget.TextView;
@@ -62,8 +67,12 @@ public class AndroidBuildingMusicPlayerActivity extends Activity implements OnCo
 	private TextView songCurrentDurationLabel;
 	private TextView songTotalDurationLabel;
 	private TextView lyricsLabel;
+	private ImageView albumArt;
 	
 	public ListView lv;
+	
+	private MediaMetadataRetriever Mdr;
+	
 	// Media Player
 	private  MediaPlayer mp;
 	// Handler to update UI timer, progress bar etc,.
@@ -85,6 +94,7 @@ public class AndroidBuildingMusicPlayerActivity extends Activity implements OnCo
 	private ArrayList<Boolean> clickStatus;
 	private Lyrics editing_lyrics;
 
+	@TargetApi(Build.VERSION_CODES.GINGERBREAD_MR1)
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -109,11 +119,15 @@ public class AndroidBuildingMusicPlayerActivity extends Activity implements OnCo
 		lv= (ListView)findViewById(R.id.lyricsview);
 		lv.setVisibility(View.GONE);
 		
+		albumArt = (ImageView) findViewById(R.id.imageView1);
+		
 		// Mediaplayer
 		mp = new MediaPlayer();
 		songManager = new SongsManager();
 		utils = new Utilities();
 		lyrics = new Lyrics();
+		
+		Mdr = new MediaMetadataRetriever();
 
 		// Listeners
 		songProgressBar.setOnSeekBarChangeListener(this); // Important
@@ -396,6 +410,7 @@ public class AndroidBuildingMusicPlayerActivity extends Activity implements OnCo
 	 * Function to play a song
 	 * @param songIndex - index of song
 	 * */
+	@TargetApi(Build.VERSION_CODES.GINGERBREAD_MR1)
 	public void  playSong(int songIndex){
 		// Play song
 		try {
@@ -405,6 +420,13 @@ public class AndroidBuildingMusicPlayerActivity extends Activity implements OnCo
 			mp.setDataSource(songPath);
 			mp.prepare();
 			mp.start();
+			
+			Mdr.setDataSource(songPath);
+			byte[] art = Mdr.getEmbeddedPicture();
+			if (art != null) {
+				albumArt.setImageBitmap(BitmapFactory.decodeByteArray(art, 0, art.length));
+			}
+			
 			// Displaying Song title
 			songTitle = songsList.get(songIndex).get("songTitle");
 			songTitleLabel.setText(songTitle);
@@ -420,10 +442,10 @@ public class AndroidBuildingMusicPlayerActivity extends Activity implements OnCo
 			updateProgressBar();
 
 			// Load lyrics for the current song.
-			String lyricsPath = songPath.replaceFirst("\\.[mM][pP]3$", ".srt");
+			String lyricsPath = songPath.replaceFirst("\\.[mM][pP]3$", ".lrc");
 			File lyricsFile = new File(lyricsPath);
 			if (lyricsFile.exists()) {
-				lyrics.load(new FileInputStream(lyricsFile), Lyrics.Format.SUBRIP);
+				lyrics.load(new FileInputStream(lyricsFile), Lyrics.Format.LRC);
 			} else {
 				// Clear existing lyrics which may be loaded from other songs.
 				lyrics.clear();
